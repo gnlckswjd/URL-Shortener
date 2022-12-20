@@ -89,7 +89,8 @@ bool Listener::Accept()
 		{
 			if(errorCode == WSAECONNABORTED)
 			{
-				Disconnet(session);
+				if(errorCode!=0)
+					Disconnet(session);
 			}
 			
 		}
@@ -197,7 +198,7 @@ void Listener::ProcessTask(HANDLE handle)
 		if (ret == FALSE || bytesTransferred == 0)
 		{
 			// 자원해제
-			
+			Disconnet(session);
 
 			continue;
 		}
@@ -210,11 +211,11 @@ void Listener::ProcessTask(HANDLE handle)
 
 		case EventType::SEND:
 			//자원 해제, 메모리
-			cout << "data send" << endl;
+
 			Disconnet(session);
 			break;
 		}
-		int a;
+
 		delete overlappedEx;
 	}
 }
@@ -258,7 +259,8 @@ void Listener::ProcessRecv(Session* session)
 			int errorCode = ::WSAGetLastError();
 			if (errorCode != WSA_IO_PENDING)
 			{
-				cout << errorCode<<endl;
+				if (errorCode != 0)
+					Disconnet(session);
 			}
 		}
 		
@@ -274,7 +276,7 @@ void Listener::ProcessRecv(Session* session)
 
 void Listener::Disconnet(Session* session)
 {
-	lock_guard<mutex> lockGuard(_mutex);
+	//lock_guard<mutex> lockGuard(_mutex);
 	if(session ==nullptr)
 	{
 		return;
