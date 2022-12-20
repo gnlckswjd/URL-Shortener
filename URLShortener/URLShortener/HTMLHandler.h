@@ -1,8 +1,8 @@
 #pragma once
 class HTMLHandler
 {
-
-	void HandlePacket();
+public:
+	static bool HandlePacket(class Session* session);
 
 	void SendPakcet();
 

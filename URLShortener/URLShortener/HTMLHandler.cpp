@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "HTMLHandler.h"
+#include "Listener.h"
+
+#include <sstream>
 
 ///TODO: 입력 데이터 확인 후 보낼 데이터 지정해서 전송
 ///1. 메인 화면
@@ -7,10 +10,29 @@
 ///3. 쇼트닝 리디렉션
 
 
-void HTMLHandler::HandlePacket()
+bool HTMLHandler::HandlePacket(Session* session)
 {
-	
+	if (session->recvBuffer == nullptr)
+	{
+		return false;
+	}
 
+	string requestMsg{session->recvBuffer} ;
+
+	vector<string> tokens;
+	stringstream sstream(requestMsg);
+
+	string token;
+	for(int i=0; i<2; i++)
+	{
+		if(getline(sstream, token,' '))
+		{
+			tokens.push_back(token);
+		}
+	}
+	cout << tokens[1] << endl;
+
+	return false;
 }
 
 void HTMLHandler::SendPakcet()

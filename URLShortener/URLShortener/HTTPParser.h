@@ -14,7 +14,7 @@ const int BUFSIZE = 2048;
 class HTTPParser
 {
 public:
-	bool IsValid(class Session* session, int& size);
+	static bool IsValid(class Session* session, int& size);
 
 };
 

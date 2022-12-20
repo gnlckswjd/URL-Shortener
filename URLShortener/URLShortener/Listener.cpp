@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Listener.h"
+
+#include "HTMLHandler.h"
 #include "HTTPParser.h"
 
 Listener::Listener() 
@@ -177,12 +179,12 @@ void Listener::ProcessTask(HANDLE handle)
 		DWORD bytesTransferred = 0;
 		Session* session = nullptr;
 		OverlappedEx* overlappedEx = nullptr;
-		BOOL ret = ::GetQueuedCompletionStatus(_iocpHandle, &bytesTransferred,
+		BOOL ret = GetQueuedCompletionStatus(_iocpHandle, &bytesTransferred,
 			(ULONG_PTR*)&session, (LPOVERLAPPED*)&overlappedEx, INFINITE);
 
 		if (ret == FALSE || bytesTransferred == 0)
 		{
-			// TODO : 연결끊김
+			// 자원해제
 			continue;
 		}
 
@@ -193,7 +195,7 @@ void Listener::ProcessTask(HANDLE handle)
 			break;
 
 		case EventType::SEND:
-			closesocket(session->socket);
+			//자원 해제, 메모리
 			break;
 		}
 		
@@ -207,11 +209,18 @@ void Listener::ProcessRecv(Session* session)
 	{
 		return;
 	}
-	HTTPParser* parser = new HTTPParser();
-	if(parser->IsValid(session,session->recvBytes))
+
+
+	if(HTTPParser::IsValid(session,session->recvBytes))
 	{
-		
+		//HTML 전송
+		HTMLHandler::HandlePacket(session);
+
 		this_thread::sleep_for(10s);
+	}
+	else
+	{
+		//자원해제
 	}
 
 }
