@@ -31,6 +31,7 @@ public:
 	void ProcessRecv(Session* session);
 	void Disconnet(Session* session);
 
+	void SendTest(Session* session);
 	
 	SOCKET _socket = INVALID_SOCKET;
 	SOCKADDR_IN listenerAddr;

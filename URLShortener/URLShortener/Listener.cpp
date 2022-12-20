@@ -237,37 +237,15 @@ void Listener::ProcessRecv(Session* session)
 
 		if (true == HTTPParser::ParsePacket(session))
 		{
+			SendTest(session);
 
-			const char* msg = "HTTP/1.0 200 OK\r\n"
-				"Content-Length: 200\r\n"
-				"Content-Type: text/html\r\n"
-				"\r\n"
-				"<html>\n<head>\n<link rel=\"icon\" href=\"data:, \">\n</head>"
-				"\n<body>\n<form action=\"\" name=\"urlForm\" method=\"get\">\n    <p>URL: <input type=\"text\" name=\"url\" /></p>\n    <input type=\"submit\" value=\"send\" />\n</form>\n</body>\n"
-				"</html>";
-			memset(session->sendBuffer, 0, sizeof(BUFFLEN));
-			memcpy(session->sendBuffer, msg, strlen(msg));
-
-			WSABUF wsaBuf;
-			wsaBuf.buf = session->sendBuffer;
-			wsaBuf.len = (ULONG)BUFFLEN;
-			DWORD numOfBytes = 0;
-			OverlappedEx* overlappedex = new OverlappedEx();
-			overlappedex->type = EventType::SEND;
-
-			WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped) , nullptr);
-			int errorCode = ::WSAGetLastError();
-			if (errorCode != WSA_IO_PENDING)
-			{
-				if (errorCode != 0)
-					Disconnet(session);
-			}
 		}
 		
 	}
 	else
 	{
 		//자원해제
+		Disconnet(session);
 	}
 
 }
@@ -290,4 +268,33 @@ void Listener::Disconnet(Session* session)
 
 	delete session;
 	session = nullptr;
+}
+
+void Listener::SendTest(Session* session)
+{
+
+	const char* msg = "HTTP/1.0 200 OK\r\n"
+		"Content-Length: 200\r\n"
+		"Content-Type: text/html\r\n"
+		"\r\n"
+		"<html>\n<head>\n<link rel=\"icon\" href=\"data:, \">\n</head>"
+		"\n<body>\n<form action=\"\" name=\"urlForm\" method=\"get\">\n    <p>URL: <input type=\"text\" name=\"url\" /></p>\n    <input type=\"submit\" value=\"send\" />\n</form>\n</body>\n"
+		"</html>";
+	memset(session->sendBuffer, 0, sizeof(BUFFLEN));
+	memcpy(session->sendBuffer, msg, strlen(msg));
+
+	WSABUF wsaBuf;
+	wsaBuf.buf = session->sendBuffer;
+	wsaBuf.len = (ULONG)BUFFLEN;
+	DWORD numOfBytes = 0;
+	OverlappedEx* overlappedex = new OverlappedEx();
+	overlappedex->type = EventType::SEND;
+
+	WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped), nullptr);
+	int errorCode = ::WSAGetLastError();
+	if (errorCode != WSA_IO_PENDING)
+	{
+		if (errorCode != 0)
+			Disconnet(session);
+	}
 }
