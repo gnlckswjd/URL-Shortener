@@ -18,9 +18,13 @@ int main()
         return 0;
     }
 
-    if(!t_listener.Accept())
+    while (true)
     {
-        return 0;
+
+        if (!t_listener.Accept())
+        {
+            return 0;
+        }
     }
     
     WSACleanup();

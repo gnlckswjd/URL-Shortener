@@ -10,10 +10,11 @@ const int BUFSIZE = 2048;
 // 첫째 줄 확인 되면 나머지 데이터 날리고
 // \r\n\r\n 까지만 받고
 
+
 class HTTPParser
 {
 public:
-	bool Check(class Session* session);
+	bool IsValid(class Session* session, int& size);
 
 };
 

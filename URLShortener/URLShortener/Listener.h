@@ -8,6 +8,8 @@ struct Session
 	SOCKET socket = INVALID_SOCKET;
 	char recvBuffer[BUFFLEN] = {};
 	int recvBytes = 0;
+	char sendBuffer[2048] = {};
+	int sendBytes = 0;
 };
 
 

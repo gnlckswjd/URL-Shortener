@@ -62,7 +62,7 @@ bool Listener::Accept()
 	int addrLen = sizeof(clientAddr);
 	SOCKET clientSocket = ::accept(_socket, (SOCKADDR*)&clientAddr, &addrLen);
 	if (clientSocket == INVALID_SOCKET)
-		return 0;
+		return false;
 
 
 	Session* session = new Session();
@@ -83,13 +83,14 @@ bool Listener::Accept()
 	DWORD flags = 0;
 	::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEX->overlapped, NULL);
 	
-
+	return true;
 }
 /*
 bool Listener::Accept()
 {
 	char    szBuf[2048];
 	::memset(&szBuf, 0, sizeof(szBuf));
+	
 	const char* msg = "HTTP/1.0 200 OK\r\n"
 	"Content-Length: 200\r\n"
 	"Content-Type: text/html\r\n"
@@ -188,9 +189,11 @@ void Listener::ProcessTask(HANDLE handle)
 		switch (overlappedEx->type)
 		{
 		case EventType::RECV:
+			ProcessRecv(session);
 			break;
 
 		case EventType::SEND:
+			closesocket(session->socket);
 			break;
 		}
 		
@@ -200,6 +203,16 @@ void Listener::ProcessTask(HANDLE handle)
 
 void Listener::ProcessRecv(Session* session)
 {
+	if (session == nullptr)
+	{
+		return;
+	}
+	HTTPParser* parser = new HTTPParser();
+	if(parser->IsValid(session,session->recvBytes))
+	{
+		
+		this_thread::sleep_for(10s);
+	}
 
 }
 
