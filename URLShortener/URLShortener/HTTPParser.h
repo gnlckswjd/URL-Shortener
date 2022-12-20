@@ -15,6 +15,7 @@ class HTTPParser
 {
 public:
 	static bool IsValid(class Session* session, int& size);
-
+	static bool ParsePacket(class Session* session);
+	
 };
 

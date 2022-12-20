@@ -69,7 +69,6 @@ bool Listener::Accept()
 
 	Session* session = new Session();
 	session->socket = clientSocket;
-	sessionManager.push_back(session);
 
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), _iocpHandle, reinterpret_cast<ULONG_PTR>(session), 0);
 
@@ -83,7 +82,18 @@ bool Listener::Accept()
 	
 	DWORD recvLen = 0;
 	DWORD flags = 0;
-	::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEX->overlapped, NULL);
+	if(WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEX->overlapped, NULL)==SOCKET_ERROR)
+	{
+		int errorCode = WSAGetLastError();
+		if(errorCode != WSA_IO_PENDING)
+		{
+			if(errorCode == WSAECONNABORTED)
+			{
+				Disconnet(session);
+			}
+			
+		}
+	}
 	
 	return true;
 }
@@ -182,9 +192,13 @@ void Listener::ProcessTask(HANDLE handle)
 		BOOL ret = GetQueuedCompletionStatus(_iocpHandle, &bytesTransferred,
 			(ULONG_PTR*)&session, (LPOVERLAPPED*)&overlappedEx, INFINITE);
 
+		
+
 		if (ret == FALSE || bytesTransferred == 0)
 		{
 			// 자원해제
+			
+
 			continue;
 		}
 
@@ -196,10 +210,12 @@ void Listener::ProcessTask(HANDLE handle)
 
 		case EventType::SEND:
 			//자원 해제, 메모리
+			cout << "data send" << endl;
+			Disconnet(session);
 			break;
 		}
-		
-
+		int a;
+		delete overlappedEx;
 	}
 }
 
@@ -211,12 +227,41 @@ void Listener::ProcessRecv(Session* session)
 	}
 
 
-	if(HTTPParser::IsValid(session,session->recvBytes))
+	if(true == HTTPParser::IsValid(session,session->recvBytes))
 	{
-		//HTML 전송
-		HTMLHandler::HandlePacket(session);
+		//TODO: URL에 요청 값 받아서 나중에 DB에도 전달할 수 있게
+		// ?url 로 오는 애들은 DB로
+		// localhost/123 으로 오는 애들은 db검색 후 리디렉션
+		string url;
 
-		this_thread::sleep_for(10s);
+		if (true == HTTPParser::ParsePacket(session))
+		{
+
+			const char* msg = "HTTP/1.0 200 OK\r\n"
+				"Content-Length: 200\r\n"
+				"Content-Type: text/html\r\n"
+				"\r\n"
+				"<html>\n<head>\n<link rel=\"icon\" href=\"data:, \">\n</head>"
+				"\n<body>\n<form action=\"\" name=\"urlForm\" method=\"get\">\n    <p>URL: <input type=\"text\" name=\"url\" /></p>\n    <input type=\"submit\" value=\"send\" />\n</form>\n</body>\n"
+				"</html>";
+			memset(session->sendBuffer, 0, sizeof(BUFFLEN));
+			memcpy(session->sendBuffer, msg, strlen(msg));
+
+			WSABUF wsaBuf;
+			wsaBuf.buf = session->sendBuffer;
+			wsaBuf.len = (ULONG)BUFFLEN;
+			DWORD numOfBytes = 0;
+			OverlappedEx* overlappedex = new OverlappedEx();
+			overlappedex->type = EventType::SEND;
+
+			WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped) , nullptr);
+			int errorCode = ::WSAGetLastError();
+			if (errorCode != WSA_IO_PENDING)
+			{
+				cout << errorCode<<endl;
+			}
+		}
+		
 	}
 	else
 	{
@@ -226,3 +271,21 @@ void Listener::ProcessRecv(Session* session)
 }
 
 
+
+void Listener::Disconnet(Session* session)
+{
+	lock_guard<mutex> lockGuard(_mutex);
+	if(session ==nullptr)
+	{
+		return;
+	}
+
+	if (session->socket != INVALID_SOCKET)
+	{
+		closesocket(session->socket);
+	}
+		
+
+	delete session;
+	session = nullptr;
+}

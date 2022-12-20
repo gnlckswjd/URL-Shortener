@@ -29,16 +29,19 @@ public:
 
 	void ProcessTask(HANDLE handle);
 	void ProcessRecv(Session* session);
+	void Disconnet(Session* session);
+
 	
 	SOCKET _socket = INVALID_SOCKET;
 	SOCKADDR_IN listenerAddr;
 	vector<thread>	_threads;
-	vector<Session*> sessionManager;
+
 
 private:
 	HANDLE _iocpHandle;
-	
+	mutex _mutex;
 };
+
 
 enum class EventType :int
 {
