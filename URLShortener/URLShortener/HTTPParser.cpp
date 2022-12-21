@@ -29,7 +29,7 @@ bool HTTPParser::IsValid(Session* session, int& size)
 	return false;
 }
 
-bool HTTPParser::ParsePacket(Session* session)
+bool HTTPParser::ParsePacket(Session* session, string token)
 {
 	if (session == nullptr)
 	{
@@ -41,16 +41,16 @@ bool HTTPParser::ParsePacket(Session* session)
 	vector<string> tokens;
 	stringstream sstream(requestMsg);
 
-	string token;
+	string temp;
 	for (int i = 0; i < 2; i++)
 	{
-		if (getline(sstream, token, ' '))
+		if (getline(sstream, temp, ' '))
 		{
-			tokens.push_back(token);
+			tokens.push_back(temp);
 		}
 	}
-	cout << tokens[1] << endl;
-
+	//cout << tokens[1] << endl;
+	token = tokens[1];
 
 	return true;
 }

@@ -235,7 +235,7 @@ void Listener::ProcessRecv(Session* session)
 		// localhost/123 으로 오는 애들은 db검색 후 리디렉션
 		string url;
 
-		if (true == HTTPParser::ParsePacket(session))
+		if (true == HTTPParser::ParsePacket(session,url))
 		{
 			SendTest(session);
 
