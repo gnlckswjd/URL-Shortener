@@ -15,6 +15,16 @@ bool HTMLHandler::HandlePacket(Session* session, string url)
 	//TODO: /?url=어쩌구저쩌구 DB 검색 후 없으면 쇼트닝
 	if(url.find("/?url=")==0)
 	{
+
+		//url 유효 체크
+
+		//검색 DB 검색
+
+		//없다? 쇼트닝
+
+		//있다? 가져옴
+
+		//쇼트닝url 정보 전송
 		SendShorteningResultMsg();
 	}
 	else
