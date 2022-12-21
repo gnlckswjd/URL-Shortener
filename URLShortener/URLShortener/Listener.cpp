@@ -237,8 +237,15 @@ void Listener::ProcessRecv(Session* session)
 
 		if (true == HTTPParser::ParsePacket(session,url))
 		{
-			SendTest(session);
-
+			//SendTest(session);
+			if(HTMLHandler::HandlePacket(session,url))
+			{
+				
+			}
+			else
+			{
+				Disconnet(session);
+			}
 		}
 		
 	}

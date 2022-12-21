@@ -29,7 +29,7 @@ bool HTTPParser::IsValid(Session* session, int& size)
 	return false;
 }
 
-bool HTTPParser::ParsePacket(Session* session, string token)
+bool HTTPParser::ParsePacket(Session* session, string& token)
 {
 	if (session == nullptr)
 	{
