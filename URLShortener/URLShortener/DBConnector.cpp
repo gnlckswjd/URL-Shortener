@@ -74,13 +74,16 @@ DBConnector::DBConnector()
 DBConnector::~DBConnector()
 {
     if(ConnPtr != nullptr)
-		mysql_close(ConnPtr);
-
+    {
+        mysql_close(ConnPtr);
+        ConnPtr = nullptr;
+	    
+    }
+		
     if (Conn != nullptr)
         delete Conn;
 
-    if (ConnPtr != nullptr)
-        delete ConnPtr;
+    
 }
 
 void DBConnector::SearchLongURL_Query(string url)
