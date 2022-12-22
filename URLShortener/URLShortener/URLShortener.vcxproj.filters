@@ -10,6 +10,9 @@
     <Filter Include="Core">
       <UniqueIdentifier>{9dde73b5-6024-4925-8c7e-ea21fd68c2c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DB">
+      <UniqueIdentifier>{24d16ed3-968c-448e-a92d-26afa6845db2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="URLShortener.cpp">
@@ -27,6 +30,9 @@
     <ClCompile Include="HTTPParser.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="DBConnector.cpp">
+      <Filter>DB</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -40,6 +46,9 @@
     </ClInclude>
     <ClInclude Include="HTTPParser.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DBConnector.h">
+      <Filter>DB</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

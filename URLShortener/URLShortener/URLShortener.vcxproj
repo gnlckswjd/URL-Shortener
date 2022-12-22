@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DBConnector.cpp" />
     <ClCompile Include="HTMLHandler.cpp" />
     <ClCompile Include="HTTPParser.cpp" />
     <ClCompile Include="Listener.cpp" />
@@ -31,6 +32,7 @@
     <ClCompile Include="URLShortener.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DBConnector.h" />
     <ClInclude Include="HTMLHandler.h" />
     <ClInclude Include="HTTPParser.h" />
     <ClInclude Include="Listener.h" />

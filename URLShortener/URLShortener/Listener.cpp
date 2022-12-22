@@ -3,10 +3,11 @@
 
 #include "HTMLHandler.h"
 #include "HTTPParser.h"
+#include "DBConnector.h"
 
 Listener::Listener() 
 {
-	
+	DB_Connector = new DBConnector();
 }
 
 Listener::~Listener()
@@ -16,6 +17,18 @@ Listener::~Listener()
 	_socket = INVALID_SOCKET;
 
 	WSACleanup();
+
+	if(DB_Connector!=nullptr)
+	{
+		delete DB_Connector;
+		DB_Connector = nullptr;
+	}
+
+	for (auto i = _threads.begin(); i != _threads.end(); i++)
+	{
+		if (i->joinable())
+			i->join();
+	}
 }
 
 bool Listener::Launch()
@@ -227,8 +240,9 @@ void Listener::ProcessRecv(Session* session)
 		return;
 	}
 
+	//TODO: if 구조 고쳐야함
 
-	if(true == HTTPParser::IsValid(session,session->recvBytes))
+	if(true == HTTPParser::IsValid(session))
 	{
 		//TODO: URL에 요청 값 받아서 나중에 DB에도 전달할 수 있게
 		// ?url 로 오는 애들은 DB로

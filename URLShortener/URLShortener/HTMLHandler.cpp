@@ -3,9 +3,9 @@
 #include "Listener.h"
 
 
-bool HTMLHandler::HandlePacket(Session* session, string url)
+bool HTMLHandler::HandlePacket(Session* session, string token)
 {
-	if(url == "/")
+	if(token == "/")
 	{
 		if(SendMainMsg(session))
 			return true;
@@ -13,10 +13,14 @@ bool HTMLHandler::HandlePacket(Session* session, string url)
 	}
 
 	//TODO: /?url=어쩌구저쩌구 DB 검색 후 없으면 쇼트닝
-	if(url.find("/?url=")==0)
+	if(token.find("/?url=")==0)
 	{
-
+		string url = token.substr(6);
 		//url 유효 체크
+		if (url.substr(0, 4) != "www.")
+		{
+			return false;
+		}
 
 		//검색 DB 검색
 
@@ -27,7 +31,7 @@ bool HTMLHandler::HandlePacket(Session* session, string url)
 		//쇼트닝url 정보 전송
 		SendShorteningResultMsg();
 	}
-	else
+	else//의미없는 else 나중에 삭제
 	{
 		return false;
 	}

@@ -17,8 +17,3 @@ using namespace std;
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
-
-#include <mysql.h>
-
-
-#pragma  comment(lib, "libmySQL.lib")
