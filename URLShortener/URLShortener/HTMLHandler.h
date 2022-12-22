@@ -2,10 +2,11 @@
 class HTMLHandler
 {
 public:
+
 	static bool HandlePacket(class Session* session, string token);
 	
 	static bool SendMainMsg(Session* session);
-	static bool SendShorteningResultMsg();
+	static bool SendShorteningResultMsg(Session* session);
 	static bool SendRedirectionMsg();
 
 private:

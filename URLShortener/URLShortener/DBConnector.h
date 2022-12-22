@@ -22,7 +22,11 @@ public:
 	void SendTest();
 
 
+	void SearchLongURL_Query(string url);
+
 	static void GetShortURL_Index(unsigned __int64& /*OUT*/index);
+
+	//TLS로 범위 지정해줘서 하는 방법도 있지만... 후순위
 	static atomic<unsigned __int64> shortIndex;
 
 private:

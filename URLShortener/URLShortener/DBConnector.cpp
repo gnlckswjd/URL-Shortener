@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "DBConnector.h"
+#include <format>
+
 
 #include <mysql.h>
 #pragma  comment(lib, "libmySQL.lib")
@@ -81,6 +83,43 @@ DBConnector::~DBConnector()
         delete ConnPtr;
 }
 
+void DBConnector::SearchLongURL_Query(string url)
+{
+    MYSQL_RES* Result;          // 쿼리성공시 결과를 담는 구조체 포인터
+    MYSQL_ROW ROW;              // 쿼리성공시 결과로 나온 행의 정보를 담는 구조체
+    int Stat;                   // 쿼리요청 후 결과(성공, 실패)
+
+    unsigned long long index;
+	GetShortURL_Index(index);
+
+    string query = format("INSERT INTO url_info (short_url,long_url)"
+        "SELECT {0}, '{1}' FROM dual WHERE NOT EXISTS"
+        "(SELECT * FROM url_info WHERE `long_url` = '{1}');", index, url);
+    
+    Stat = mysql_query(ConnPtr, query.c_str());
+    if (Stat != 0)
+    {
+        cout << "Query Error" << mysql_error(Conn) << endl;
+        //TODO: 처리
+
+        return;
+    }
+    string query2 = format("SELECT short_url FROM url_info where long_url = '{}';",url);
+
+    Stat = mysql_query(ConnPtr, query2.c_str());
+    if (Stat != 0)
+    {
+        cout << "Query Error" << mysql_error(Conn) << endl;
+        //TODO: 처리
+
+        return;
+    }
+    Result = mysql_store_result(ConnPtr);
+
+    while ((ROW = mysql_fetch_row(Result)) != NULL)
+        cout << ROW[0] <<endl;
+    mysql_free_result(Result);
+}
 
 
 
@@ -94,7 +133,7 @@ void DBConnector::SendTest()
     Stat = mysql_query(ConnPtr, Query);
     if (Stat != 0)
     {
-        cout << "Query Error" << endl;
+        cout << "Query Error" << mysql_error(Conn)<<endl;
     }
     Result = mysql_store_result(ConnPtr);
 

@@ -10,6 +10,7 @@ using namespace std;
 #include <set>
 #include <mutex>
 
+#include <sstream>
 
 
 #include "WinSock2.h"

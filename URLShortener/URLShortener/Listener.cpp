@@ -111,91 +111,7 @@ bool Listener::Accept()
 	
 	return true;
 }
-/*
-bool Listener::Accept()
-{
-	char    szBuf[2048];
-	::memset(&szBuf, 0, sizeof(szBuf));
-	
-	const char* msg = "HTTP/1.0 200 OK\r\n"
-	"Content-Length: 200\r\n"
-	"Content-Type: text/html\r\n"
-	"\r\n"
-	"<html>\n<head>\n<link rel=\"icon\" href=\"data:, \">\n</head>"
-	"\n<body>\n<form action=\"\" name=\"urlForm\" method=\"get\">\n    <p>URL: <input type=\"text\" name=\"url\" /></p>\n    <input type=\"submit\" value=\"send\" />\n</form>\n</body>\n"
-	"</html>";
 
-	memcpy(&szBuf, msg, strlen(msg));
-
-	char    szInBuf[2048];
-
-
-	while (true)
-	{
-		SOCKADDR_IN clientAddr;
-		::memset(&clientAddr, 0, sizeof(clientAddr));
-		int addrLen = sizeof(clientAddr);
-		SOCKET clientSocket = ::accept(_socket, (SOCKADDR*)&clientAddr, &addrLen);
-
-		if (clientSocket == INVALID_SOCKET)
-		{
-			
-			if (::WSAGetLastError() == WSAEWOULDBLOCK)
-				continue;
-			//Error
-			break;
-		}
-		
-
-		char ipAddress[16];
-		::inet_ntop(AF_INET, &clientAddr.sin_addr, ipAddress, sizeof(ipAddress));
-		cout << "Client Conneted IP : " << ipAddress << endl;
-		
-		while (true)
-		{
-			memset(szInBuf, 0, sizeof(szInBuf));
-
-			int recvLen = recv(clientSocket, szInBuf, sizeof(szInBuf), 0);
-			if (recvLen == SOCKET_ERROR)
-			{
-				if (::WSAGetLastError() == WSAEWOULDBLOCK)
-					continue;
-
-				break;
-			}
-			else if (recvLen == 0)
-			{
-				break;
-			}
-
-			cout << "MSG received" << endl;
-
-			
-
-			printf("%s", szInBuf);
-			
-
-			while (true)
-			{
-				if (::send(clientSocket, szBuf, recvLen, 0) == SOCKET_ERROR)
-				{
-					if (::WSAGetLastError() == WSAEWOULDBLOCK)
-						continue;
-					//Error
-					break;
-				}
-				cout << "Send Data!Len = " << recvLen << endl;
-				break;
-			}
-		}
-
-
-		closesocket(clientSocket);
-
-	}
-	return true;
-}
-*/
 void Listener::ProcessTask(HANDLE handle)
 {
 	while (true)
@@ -240,34 +156,35 @@ void Listener::ProcessRecv(Session* session)
 		return;
 	}
 
-	//TODO: if 구조 고쳐야함
 
-	if(true == HTTPParser::IsValid(session))
+	if (HTTPParser::IsValid(session)== false)
 	{
-		//TODO: URL에 요청 값 받아서 나중에 DB에도 전달할 수 있게
-		// ?url 로 오는 애들은 DB로
-		// localhost/123 으로 오는 애들은 db검색 후 리디렉션
-		string url;
+		Disconnet(session);
+		return;
+	}
 
-		if (true == HTTPParser::ParsePacket(session,url))
-		{
-			//SendTest(session);
-			if(HTMLHandler::HandlePacket(session,url))
-			{
-				
-			}
-			else
-			{
-				Disconnet(session);
-			}
-		}
+	string url;
+
+	if(HTTPParser::ParsePacket(session,url)==false)
+	{
+		Disconnet(session);
+		return;
+	}
+
+	//TODO: URL에 요청 값 받아서 나중에 DB에도 전달할 수 있게
+	// ?url 로 오는 애들은 DB로
+	// localhost/123 으로 오는 애들은 db검색 후 리디렉션
+	//SendTest(session);
+
+	if(HTMLHandler::HandlePacket(session,url))
+	{
 		
 	}
 	else
 	{
-		//자원해제
 		Disconnet(session);
 	}
+	
 
 }
 
