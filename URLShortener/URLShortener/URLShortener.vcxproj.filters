@@ -33,6 +33,7 @@
     <ClCompile Include="DBConnector.cpp">
       <Filter>DB</Filter>
     </ClCompile>
+    <ClCompile Include="Rebase64.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -49,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="DBConnector.h">
       <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="Rebase64.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -6,15 +6,7 @@
 int main()
 {
     
-
-    DBConnector db;
-    db.SendTest();
-    unsigned __int64 a;
-    db.GetShortURL_Index(a);
-    db.GetShortURL_Index(a);
-    db.GetShortURL_Index(a);
-    db.GetShortURL_Index(a);
-    db.GetShortURL_Index(a);
+    
     
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)

@@ -7,7 +7,7 @@
 
 Listener::Listener() 
 {
-	DB_Connector = new DBConnector();
+	
 }
 
 Listener::~Listener()
@@ -17,13 +17,7 @@ Listener::~Listener()
 	_socket = INVALID_SOCKET;
 
 	WSACleanup();
-
-	if(DB_Connector!=nullptr)
-	{
-		delete DB_Connector;
-		DB_Connector = nullptr;
-	}
-
+	
 	for (auto i = _threads.begin(); i != _threads.end(); i++)
 	{
 		if (i->joinable())

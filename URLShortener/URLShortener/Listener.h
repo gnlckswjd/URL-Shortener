@@ -41,8 +41,7 @@ public:
 private:
 	HANDLE _iocpHandle;
 	mutex _mutex;
-
-	class DBConnector* DB_Connector;
+	
 };
 
 

@@ -18,11 +18,9 @@ public:
 	DBConnector();
 	~DBConnector();
 
+	
 
-	void SendTest();
-
-
-	void SearchLongURL_Query(string url);
+	bool SearchLongURL_Query(string url, char* shortURL);
 
 	static void GetShortURL_Index(unsigned __int64& /*OUT*/index);
 
@@ -31,8 +29,9 @@ public:
 
 private:
 
+	void Disconnect(MYSQL* ConnPtr);
 private:
 	
 	MYSQL* Conn=nullptr;                 // MySQL 정보를 담을 구조체
-	MYSQL* ConnPtr = nullptr;
+	
 };

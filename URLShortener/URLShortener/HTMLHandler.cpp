@@ -2,6 +2,7 @@
 #include "HTMLHandler.h"
 #include "Listener.h"
 #include "DBConnector.h"
+#include "Rebase64.h"
 
 bool HTMLHandler::HandlePacket(Session* session, string token)
 {
@@ -24,11 +25,19 @@ bool HTMLHandler::HandlePacket(Session* session, string token)
 
 		//검색 DB 검색
 		DBConnector db;
-		//없다? 쇼트닝 후 저장
-		db.SearchLongURL_Query(url);
-		//있다? 가져옴
+		char shortURL[2048]={};
 
+		db.SearchLongURL_Query(url, shortURL);
+
+		//쇼트닝
+		string rebaseURL = Rebase64::Encode(shortURL);
+
+		//string test =Rebase64::Decode(rebaseURL);
 		//쇼트닝url 정보 전송
+
+		//rebaseURL = Rebase64::Encode(shortURL);
+
+
 		if(SendShorteningResultMsg(session))
 		{
 			return true;
