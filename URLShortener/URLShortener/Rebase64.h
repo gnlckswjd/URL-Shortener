@@ -12,7 +12,7 @@ class Rebase64
 {
 public:
     
-    static string Encode(const string src);
+    static string Encode(const string& src);
 
     static string Decode(const string src);
 

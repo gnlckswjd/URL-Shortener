@@ -48,7 +48,6 @@ bool HTTPParser::ParsePacket(Session* session, string& token)
 			tokens.push_back(temp);
 		}
 	}
-	//cout << tokens[1] << endl;
 	token = tokens[1];
 
 	return true;

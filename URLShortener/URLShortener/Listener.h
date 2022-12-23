@@ -33,15 +33,16 @@ public:
 
 	void SendTest(Session* session);
 	
-	SOCKET _socket = INVALID_SOCKET;
-	SOCKADDR_IN listenerAddr;
-	vector<thread>	_threads;
+	
 
 
 private:
 	HANDLE _iocpHandle;
+	SOCKET _socket = INVALID_SOCKET;
+	SOCKADDR_IN listenerAddr;
+
+	vector<thread>	_threads;
 	mutex _mutex;
-	
 };
 
 

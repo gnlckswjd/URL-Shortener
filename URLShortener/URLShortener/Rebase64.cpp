@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Rebase64.h"
 
-string Rebase64::Encode(const string src)
+string Rebase64::Encode(const string& src)
 {
     
     std::string result;

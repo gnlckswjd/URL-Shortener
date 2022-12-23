@@ -120,7 +120,6 @@ void Listener::ProcessTask(HANDLE handle)
 
 		if (ret == FALSE || bytesTransferred == 0)
 		{
-			// 자원해제
 			Disconnet(session);
 
 			continue;
@@ -133,8 +132,6 @@ void Listener::ProcessTask(HANDLE handle)
 			break;
 
 		case EventType::SEND:
-			//자원 해제, 메모리
-
 			Disconnet(session);
 			break;
 		}
@@ -159,18 +156,13 @@ void Listener::ProcessRecv(Session* session)
 
 	string url;
 
-	if(HTTPParser::ParsePacket(session,url)==false)
+	if (HTTPParser::ParsePacket(session,url)==false)
 	{
 		Disconnet(session);
 		return;
 	}
 
-	//TODO: URL에 요청 값 받아서 나중에 DB에도 전달할 수 있게
-	// ?url 로 오는 애들은 DB로
-	// localhost/123 으로 오는 애들은 db검색 후 리디렉션
-	//SendTest(session);
-
-	if(HTMLHandler::HandlePacket(session,url))
+	if (HTMLHandler::HandlePacket(session,url))
 	{
 		
 	}

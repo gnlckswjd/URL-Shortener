@@ -3,6 +3,7 @@
 #include "Listener.h"
 #include "DBConnector.h"
 #include "Rebase64.h"
+#include <format>
 
 bool HTMLHandler::HandlePacket(Session* session, string token)
 {
@@ -12,36 +13,31 @@ bool HTMLHandler::HandlePacket(Session* session, string token)
 			return true;
 		return false;
 	}
-
-	//TODO: /?url=어쩌구저쩌구 DB 검색 후 없으면 쇼트닝
+	
 	if(token.find("/?url=")==0)
 	{
 		string url = token.substr(6);
-		//url 유효 체크
+
 		if (url.substr(0, 4) != "www.")
 		{
 			return false;
 		}
 
-		//검색 DB 검색
-		DBConnector db;
-		char shortURL[2048]={};
-
-		db.SearchLongURL_Query(url, shortURL);
-
-		//쇼트닝
+		string shortURL;
+		{
+			DBConnector db;
+			db.SearchLongURL_Query(url, shortURL);
+		}
+		
 		string rebaseURL = Rebase64::Encode(shortURL);
 
-		//string test =Rebase64::Decode(rebaseURL);
-		//쇼트닝url 정보 전송
-
-		//rebaseURL = Rebase64::Encode(shortURL);
 
 
-		if(SendShorteningResultMsg(session))
+		if (SendShorteningResultMsg(session, rebaseURL))
 		{
 			return true;
 		}
+
 	}
 	else//의미없는 else 나중에 삭제
 	{
@@ -49,8 +45,11 @@ bool HTMLHandler::HandlePacket(Session* session, string token)
 	}
 
 	//TODO: /abcdefgh DB 검색후 없으면 오류, 있으면 리디렉션
-	
-
+	if (token.find("localhost/") == 0)
+	{
+		string url = Rebase64::Decode(token.substr(10));
+		
+	}
 	return false;
 }
 
@@ -83,17 +82,20 @@ bool HTMLHandler::SendMainMsg(Session* session)
 	return true;
 }
 
-bool HTMLHandler::SendShorteningResultMsg(Session* session)
+bool HTMLHandler::SendShorteningResultMsg(Session* session, string url)
 {
-	const char* shorteningResultMsg = "HTTP/1.0 200 OK\r\n"
+	string msg = format("HTTP/1.0 200 OK\r\n"
 		"Content-Length: 200\r\n"
 		"Content-Type: text/html\r\n"
 		"\r\n"
 		"<html>\n<head>\n<link rel=\"icon\" href=\"data:, \">\n</head>"
-		"\n<body>\shorteningResult\n</body>\n"
-		"</html>";
+		"\n<body>localhost/{}\n</body>\n"
+		"</html>",  url);
+
+
+	const char* resultMsg =msg.c_str();
 	memset(session->sendBuffer, 0, sizeof(BUFFLEN));
-	memcpy(session->sendBuffer, shorteningResultMsg, strlen(shorteningResultMsg));
+	memcpy(session->sendBuffer, resultMsg, strlen(resultMsg));
 
 	WSABUF wsaBuf;
 	wsaBuf.buf = session->sendBuffer;
@@ -112,7 +114,7 @@ bool HTMLHandler::SendShorteningResultMsg(Session* session)
 	return true;
 }
 
-bool HTMLHandler::SendRedirectionMsg()
+bool HTMLHandler::SendRedirectionMsg(Session* session, string url)
 {
 	return true;
 }

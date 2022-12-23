@@ -83,12 +83,12 @@ void DBConnector::Disconnect(MYSQL* ConnPtr)
 
 
 
-bool DBConnector::SearchLongURL_Query(string url, char* shortURL)
+bool DBConnector::SearchLongURL_Query(string url, string& shortURL)
 {
     MYSQL* ConnPtr = nullptr;
-    MYSQL_RES* Result;          // 쿼리성공시 결과를 담는 구조체 포인터
-    MYSQL_ROW ROW;              // 쿼리성공시 결과로 나온 행의 정보를 담는 구조체
-    int Stat;                   // 쿼리요청 후 결과(성공, 실패)
+    MYSQL_RES* Result;         
+    MYSQL_ROW ROW;             
+    int Stat;                  
 
     ConnPtr = mysql_real_connect(Conn, "localhost", "root", "1234", "mydb", 3306, NULL, 0);
 
@@ -140,9 +140,9 @@ bool DBConnector::SearchLongURL_Query(string url, char* shortURL)
         Disconnect(ConnPtr);
         return false;
     }
-
-    strcpy_s(shortURL,2048,ROW[0]);
-
+    string tempURL(ROW[0]);
+    shortURL = tempURL;
+    
     Disconnect(ConnPtr);
 
     return true;
