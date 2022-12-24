@@ -89,7 +89,7 @@ bool DBConnector::SearchLongURL_Query(string url, string& shortURL)
     MYSQL_RES* Result;         
     MYSQL_ROW ROW;             
     int Stat;                  
-
+    
     ConnPtr = mysql_real_connect(Conn, "localhost", "root", "1234", "mydb", 3306, NULL, 0);
 
     if (ConnPtr == nullptr)
@@ -148,6 +148,54 @@ bool DBConnector::SearchLongURL_Query(string url, string& shortURL)
     return true;
 }
 
+bool DBConnector::SearchShortURL_Query(string url, string& longURL)
+{
+    MYSQL* ConnPtr = nullptr;
+    MYSQL_RES* Result;
+    MYSQL_ROW ROW;
+    int Stat;
+
+    ConnPtr = mysql_real_connect(Conn, "localhost", "root", "1234", "mydb", 3306, NULL, 0);
+
+    if (ConnPtr == nullptr)
+    {
+        return false;
+    }
+
+    string query2 = format("SELECT long_url FROM url_info where short_url = '{}';", url);
+    Stat = mysql_query(ConnPtr, query2.c_str());
+    if (Stat != 0)
+    {
+        cout << "Query Error" << mysql_error(Conn) << endl;
+        //TODO: 처리
+        Disconnect(ConnPtr);
+        return false;
+    }
+    Result = mysql_store_result(ConnPtr);
+
+    if (mysql_num_rows(Result) != 1)
+    {
+        Disconnect(ConnPtr);
+        return false;
+    }
+
+    ROW = mysql_fetch_row(Result);
+    cout << ROW[0] << endl;
+    mysql_free_result(Result);
+
+    if (ROW == NULL)
+    {
+        Disconnect(ConnPtr);
+        return false;
+    }
+
+    string tempURL(ROW[0]);
+    longURL = tempURL;
+
+    Disconnect(ConnPtr);
+
+    return true;
+}
 
 
 void DBConnector::GetShortURL_Index(unsigned long long& index)

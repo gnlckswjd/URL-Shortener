@@ -24,9 +24,15 @@ bool HTMLHandler::HandlePacket(Session* session, string token)
 		}
 
 		string shortURL;
+
 		{
+
 			DBConnector db;
-			db.SearchLongURL_Query(url, shortURL);
+			if(db.SearchLongURL_Query(url, shortURL)==false)
+			{
+				return false;
+			}
+
 		}
 		
 		string rebaseURL = Rebase64::Encode(shortURL);
@@ -39,17 +45,24 @@ bool HTMLHandler::HandlePacket(Session* session, string token)
 		}
 
 	}
-	else//의미없는 else 나중에 삭제
+
+	if (token[0] == '/' && token.length()<10)
 	{
-		return false;
+		string url = Rebase64::Decode(token.substr(1));
+		string longURL;
+		{
+			DBConnector db;
+			if (db.SearchShortURL_Query(url, longURL) == false)
+			{
+				return false;
+			}
+		}
+		if (SendRedirectionMsg(session, longURL))
+		{
+			return true;
+		}
 	}
 
-	//TODO: /abcdefgh DB 검색후 없으면 오류, 있으면 리디렉션
-	if (token.find("localhost/") == 0)
-	{
-		string url = Rebase64::Decode(token.substr(10));
-		
-	}
 	return false;
 }
 
@@ -82,7 +95,7 @@ bool HTMLHandler::SendMainMsg(Session* session)
 	return true;
 }
 
-bool HTMLHandler::SendShorteningResultMsg(Session* session, string url)
+bool HTMLHandler::SendShorteningResultMsg(Session* session, const string& url)
 {
 	string msg = format("HTTP/1.0 200 OK\r\n"
 		"Content-Length: 200\r\n"
@@ -114,7 +127,34 @@ bool HTMLHandler::SendShorteningResultMsg(Session* session, string url)
 	return true;
 }
 
-bool HTMLHandler::SendRedirectionMsg(Session* session, string url)
+bool HTMLHandler::SendRedirectionMsg(Session* session, const string& url)
 {
+	string msg = format("HTTP/1.0 200 OK\r\n"
+		"Content-Length: 200\r\n"
+		"Content-Type: text/html\r\n"
+		"\r\n"
+		"<html>\n<head>\n<link rel=\"icon\" href=\"data:, \">\n</head>"
+		"\n<body>\n<meta http-equiv=\"refresh\" content=\"0.1; url = http://{}\" />\n</body>\n"
+		"</html>", url);
+
+
+	const char* resultMsg = msg.c_str();
+	memset(session->sendBuffer, 0, sizeof(BUFFLEN));
+	memcpy(session->sendBuffer, resultMsg, strlen(resultMsg));
+
+	WSABUF wsaBuf;
+	wsaBuf.buf = session->sendBuffer;
+	wsaBuf.len = (ULONG)BUFFLEN;
+	DWORD numOfBytes = 0;
+	OverlappedEx* overlappedex = new OverlappedEx();
+	overlappedex->type = EventType::SEND;
+
+	WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped), nullptr);
+	int errorCode = ::WSAGetLastError();
+	if (errorCode != WSA_IO_PENDING)
+	{
+		if (errorCode != 0)
+			return false;
+	}
 	return true;
 }

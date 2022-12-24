@@ -20,7 +20,7 @@ public:
 
 	bool SearchLongURL_Query(string url, string& shortURL);
 
-	bool SearchShortURL_Query(string url);
+	bool SearchShortURL_Query(string url, string& longURL);
 
 
 	static void GetShortURL_Index(unsigned __int64& /*OUT*/index);
