@@ -75,23 +75,11 @@ bool HTMLHandler::SendMainMsg(Session* session)
 		"<html>\n<head>\n<link rel=\"icon\" href=\"data:, \">\n</head>"
 		"\n<body>\n<form action=\"\" name=\"urlForm\" method=\"get\">\n    <p>URL: <input type=\"text\" name=\"url\" /></p>\n    <input type=\"submit\" value=\"send\" />\n</form>\n</body>\n"
 		"</html>";
-	memset(session->sendBuffer, 0, sizeof(BUFFLEN));
-	memcpy(session->sendBuffer, msg, strlen(msg));
-
-	WSABUF wsaBuf;
-	wsaBuf.buf = session->sendBuffer;
-	wsaBuf.len = (ULONG)BUFFLEN;
-	DWORD numOfBytes = 0;
-	OverlappedEx* overlappedex = new OverlappedEx();
-	overlappedex->type = EventType::SEND;
-
-	WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped), nullptr);
-	int errorCode = ::WSAGetLastError();
-	if (errorCode != WSA_IO_PENDING)
+	if (Send(session, msg) == false)
 	{
-		if (errorCode != 0)
-			return false;
+		return false;
 	}
+	
 	return true;
 }
 
@@ -106,24 +94,11 @@ bool HTMLHandler::SendShorteningResultMsg(Session* session, const string& url)
 		"</html>",  url);
 
 
-	const char* resultMsg =msg.c_str();
-	memset(session->sendBuffer, 0, sizeof(BUFFLEN));
-	memcpy(session->sendBuffer, resultMsg, strlen(resultMsg));
-
-	WSABUF wsaBuf;
-	wsaBuf.buf = session->sendBuffer;
-	wsaBuf.len = (ULONG)BUFFLEN;
-	DWORD numOfBytes = 0;
-	OverlappedEx* overlappedex = new OverlappedEx();
-	overlappedex->type = EventType::SEND;
-
-	WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped), nullptr);
-	int errorCode = ::WSAGetLastError();
-	if (errorCode != WSA_IO_PENDING)
+	if (Send(session, msg.c_str()) == false)
 	{
-		if (errorCode != 0)
-			return false;
+		return false;
 	}
+
 	return true;
 }
 
@@ -137,10 +112,22 @@ bool HTMLHandler::SendRedirectionMsg(Session* session, const string& url)
 		"\n<body>\n<meta http-equiv=\"refresh\" content=\"0.1; url = http://{}\" />\n</body>\n"
 		"</html>", url);
 
+	if(Send(session, msg.c_str())==false)
+	{
+		return false;
+	}
 
-	const char* resultMsg = msg.c_str();
+
+	return true;
+}
+
+bool HTMLHandler::Send(Session* session, const char* msg)
+{
+	if (session == nullptr)
+		return false;
+	
 	memset(session->sendBuffer, 0, sizeof(BUFFLEN));
-	memcpy(session->sendBuffer, resultMsg, strlen(resultMsg));
+	memcpy(session->sendBuffer, msg, strlen(msg));
 
 	WSABUF wsaBuf;
 	wsaBuf.buf = session->sendBuffer;
