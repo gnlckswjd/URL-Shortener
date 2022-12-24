@@ -2,12 +2,11 @@
 #include "HTTPParser.h"
 #include "Listener.h"
 
-//TODO: if (previous == '\r' && current == '\n')    Cumulative 버퍼에 데이터 넣고 \r\n 두번 나오면 끝?
 bool HTTPParser::IsValid(Session* session)
 {
 	if (session == nullptr)
 		return false;
-	// 받은 데이터 수만큼
+
 	char* previous= session->recvBuffer;
 	char* current = session->recvBuffer;
 

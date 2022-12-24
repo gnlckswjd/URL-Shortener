@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Listener.h"
-
 #include "HTMLHandler.h"
 #include "HTTPParser.h"
 #include "DBConnector.h"
@@ -72,14 +71,14 @@ bool Listener::Accept()
 	int addrLen = sizeof(clientAddr);
 	SOCKET clientSocket = ::accept(_socket, (SOCKADDR*)&clientAddr, &addrLen);
 	if (clientSocket == INVALID_SOCKET)
+	{
 		return false;
-
+	}
 
 	Session* session = new Session();
 	session->socket = clientSocket;
 
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), _iocpHandle, reinterpret_cast<ULONG_PTR>(session), 0);
-
 
 	WSABUF wsaBuf;
 	wsaBuf.buf = session->recvBuffer;
@@ -90,18 +89,22 @@ bool Listener::Accept()
 	
 	DWORD recvLen = 0;
 	DWORD flags = 0;
-	if(WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEX->overlapped, NULL)==SOCKET_ERROR)
+	if (WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEX->overlapped, NULL)==SOCKET_ERROR)
 	{
 		int errorCode = WSAGetLastError();
-		if(errorCode != WSA_IO_PENDING)
+
+		if (errorCode == WSA_IO_PENDING)
 		{
-			if(errorCode == WSAECONNABORTED)
-			{
-				if(errorCode!=0)
-					Disconnet(session);
-			}
-			
+			return true;
 		}
+		
+		if (errorCode == WSAECONNABORTED)
+		{
+			Disconnet(session);
+			return false;
+		}
+			
+		
 	}
 	
 	return true;
@@ -114,15 +117,11 @@ void Listener::ProcessTask(HANDLE handle)
 		DWORD bytesTransferred = 0;
 		Session* session = nullptr;
 		OverlappedEx* overlappedEx = nullptr;
-		BOOL ret = GetQueuedCompletionStatus(_iocpHandle, &bytesTransferred,
-			(ULONG_PTR*)&session, (LPOVERLAPPED*)&overlappedEx, INFINITE);
-
-		
+		BOOL ret = GetQueuedCompletionStatus(_iocpHandle, &bytesTransferred,(ULONG_PTR*)&session, (LPOVERLAPPED*)&overlappedEx, INFINITE);
 
 		if (ret == FALSE || bytesTransferred == 0)
 		{
 			Disconnet(session);
-
 			continue;
 		}
 
@@ -148,8 +147,7 @@ void Listener::ProcessRecv(Session* session)
 		return;
 	}
 
-
-	if (HTTPParser::IsValid(session)== false)
+	if (HTTPParser::IsValid(session) == false)
 	{
 		Disconnet(session);
 		return;
@@ -163,23 +161,14 @@ void Listener::ProcessRecv(Session* session)
 		return;
 	}
 
-	if (HTMLHandler::HandlePacket(session,url))
-	{
-		
-	}
-	else
+	if (HTMLHandler::HandlePacket(session,url)==false)
 	{
 		Disconnet(session);
 	}
-	
-
 }
-
-
 
 void Listener::Disconnet(Session* session)
 {
-	//lock_guard<mutex> lockGuard(_mutex);
 	if(session ==nullptr)
 	{
 		return;
@@ -189,37 +178,7 @@ void Listener::Disconnet(Session* session)
 	{
 		closesocket(session->socket);
 	}
-		
 
 	delete session;
 	session = nullptr;
-}
-
-void Listener::SendTest(Session* session)
-{
-
-	const char* msg = "HTTP/1.0 200 OK\r\n"
-		"Content-Length: 200\r\n"
-		"Content-Type: text/html\r\n"
-		"\r\n"
-		"<html>\n<head>\n<link rel=\"icon\" href=\"data:, \">\n</head>"
-		"\n<body>\n<form action=\"\" name=\"urlForm\" method=\"get\">\n    <p>URL: <input type=\"text\" name=\"url\" /></p>\n    <input type=\"submit\" value=\"send\" />\n</form>\n</body>\n"
-		"</html>";
-	memset(session->sendBuffer, 0, sizeof(BUFFLEN));
-	memcpy(session->sendBuffer, msg, strlen(msg));
-
-	WSABUF wsaBuf;
-	wsaBuf.buf = session->sendBuffer;
-	wsaBuf.len = (ULONG)BUFFLEN;
-	DWORD numOfBytes = 0;
-	OverlappedEx* overlappedex = new OverlappedEx();
-	overlappedex->type = EventType::SEND;
-
-	WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped), nullptr);
-	int errorCode = ::WSAGetLastError();
-	if (errorCode != WSA_IO_PENDING)
-	{
-		if (errorCode != 0)
-			Disconnet(session);
-	}
 }

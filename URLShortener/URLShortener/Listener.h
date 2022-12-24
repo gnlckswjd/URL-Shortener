@@ -13,9 +13,18 @@ struct Session
 };
 
 
-/*
- *  Listener
- */
+enum class EventType :int
+{
+	RECV,
+	SEND
+};
+
+struct OverlappedEx
+{
+	WSAOVERLAPPED overlapped = {};
+	EventType type;
+};
+
 class Listener
 {
 
@@ -31,10 +40,6 @@ public:
 	void ProcessRecv(Session* session);
 	void Disconnet(Session* session);
 
-	void SendTest(Session* session);
-	
-	
-
 
 private:
 	HANDLE _iocpHandle;
@@ -43,17 +48,4 @@ private:
 
 	vector<thread>	_threads;
 	mutex _mutex;
-};
-
-
-enum class EventType :int
-{
-	RECV,
-	SEND
-};
-
-struct OverlappedEx
-{
-	WSAOVERLAPPED overlapped = {};
-	EventType type;
 };
