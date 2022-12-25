@@ -99,12 +99,17 @@ bool DBConnector::SearchLongURL_Query(string url, string& shortURL)
 
 bool DBConnector::SearchShortURL_Query(string url, string& longURL)
 {
+    if (Conn == nullptr)
+    {
+        return false;
+    }
     MYSQL* ConnPtr = nullptr;
     MYSQL_RES* Result;
     MYSQL_ROW ROW;
     int Stat;
     {
         lock_guard<mutex> guard(dbMutex);
+        
         ConnPtr = mysql_real_connect(Conn, "localhost", "root", "1234", "mydb", 3306, NULL, 0);
         if (ConnPtr == nullptr)
         {
