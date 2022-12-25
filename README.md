@@ -17,11 +17,11 @@
   - 그 외 라이브러리
 - MySQL (8.0.31.0)
 ### 클래스 소개
-- [Listener.h](./URLShortener/URLShortener/Listener.h), [Listener.cpp](./URLShortener/URLShortener/Listener.cpp): 통신 구조 구현, 스레드 
-- [HTTPParser.h](./URLShortener/URLShortener/HTTPParser.h),[HTTPParser.cpp](./URLShortener/URLShortener/HTTPParser.cpp): 패킷이 올바른지(시작 줄만 확인), 필요하 부분 파싱
-- [HTMLHandler.h](./URLShortener/URLShortener/HTMLHandler.h), [HTMLHandler.cpp](./URLShortener/URLShortener/HTMLHandler.cpp): 요청에 따른 동작 수행(메인 화면, 단축, 리다이렉션), 데이터(html) 전송
-- [DBConnector.h](./URLShortener/URLShortener/DBConnector.h), [DBConnector.cpp](./URLShortener/URLShortener/DBConnector.cpp): DB 접근하여 단축url 저장, url 검색
-- [Rebase64.h](./URLShortener/URLShortener/Rebase64.h), [Rebase64.cpp](./URLShortener/URLShortener/Rebase64.cpp): 인코딩, 디코딩
+- Listener([Listener.h](./URLShortener/URLShortener/Listener.h), [Listener.cpp](./URLShortener/URLShortener/Listener.cpp)): 통신 구조 구현, 스레드 
+- HTTPParser([HTTPParser.h](./URLShortener/URLShortener/HTTPParser.h),[HTTPParser.cpp](./URLShortener/URLShortener/HTTPParser.cpp)): 패킷이 올바른지(시작 줄만 확인), 필요하 부분 파싱
+- HTMLHandler([HTMLHandler.h](./URLShortener/URLShortener/HTMLHandler.h), [HTMLHandler.cpp](./URLShortener/URLShortener/HTMLHandler.cpp)): 요청에 따른 동작 수행(메인 화면, 단축, 리다이렉션), 데이터(html) 전송
+- DBConnector([DBConnector.h](./URLShortener/URLShortener/DBConnector.h), [DBConnector.cpp](./URLShortener/URLShortener/DBConnector.cpp)): DB 접근하여 단축url 저장, url 검색
+- Rebase64([Rebase64.h](./URLShortener/URLShortener/Rebase64.h), [Rebase64.cpp](./URLShortener/URLShortener/Rebase64.cpp)): 인코딩, 디코딩
 
 
 ### 확인 받고 싶은 부분
