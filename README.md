@@ -4,7 +4,7 @@
 - URL $\rightarrow$ 8자리 단축
   - 동일한 URL에 대한, 동일한 단축 결과
 - 단축된 URL로 접속시 리다이렉션
-![](https://velog.velcdn.com/images/oak_cassia/post/67d414e5-295b-45f8-8c53-bf44e5e2b3cd/image.png)
+![](./img/summary.png)
 - IOCP 모델, 멀티스레드 활용
 
 - 메모리 관리  
