@@ -121,27 +121,14 @@ bool HTMLHandler::SendRedirectionMsg(Session* session, const string& url)
 	return true;
 }
 
+
 bool HTMLHandler::Send(Session* session, const char* msg)
 {
 	if (session == nullptr)
 		return false;
-	
+	session->sendBytes = strlen(msg)+1;
 	memset(session->sendBuffer, 0, sizeof(BUFFLEN));
-	memcpy(session->sendBuffer, msg, strlen(msg));
-
-	WSABUF wsaBuf;
-	wsaBuf.buf = session->sendBuffer;
-	wsaBuf.len = (ULONG)BUFFLEN;
-	DWORD numOfBytes = 0;
-	OverlappedEx* overlappedex = new OverlappedEx();
-	overlappedex->type = EventType::SEND;
-
-	WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped), nullptr);
-	int errorCode = ::WSAGetLastError();
-	if (errorCode != WSA_IO_PENDING)
-	{
-		if (errorCode != 0)
-			return false;
-	}
+	memcpy(session->sendBuffer, msg, session->sendBytes);
+	
 	return true;
 }

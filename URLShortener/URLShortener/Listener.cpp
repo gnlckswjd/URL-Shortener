@@ -55,6 +55,8 @@ bool Listener::Launch()
 		return false;
 	}
 
+	_sendThread = thread([this]() { SendPacket(); });
+
 	const unsigned int count = thread::hardware_concurrency();
 
 	for (int i =0; i< count; i++)
@@ -161,10 +163,18 @@ void Listener::ProcessRecv(Session* session)
 		return;
 	}
 
-	if (HTMLHandler::HandlePacket(session,url)==false)
+	if (HTMLHandler::HandlePacket(session,url)==true)
 	{
-		Disconnet(session);
+
+		{
+			lock_guard<mutex> guard(_mutex);
+			_sessions.push_back(session);
+		}
+		return;
 	}
+
+
+	Disconnet(session);
 }
 
 void Listener::Disconnet(Session* session)
@@ -181,4 +191,50 @@ void Listener::Disconnet(Session* session)
 
 	delete session;
 	session = nullptr;
+}
+
+void Listener::SendPacket()
+{
+	while(true)
+	{
+		Session* session = PopPacket();
+		if(session != nullptr)
+		{
+			WSABUF wsaBuf;
+			wsaBuf.buf = session->sendBuffer;
+			wsaBuf.len = (ULONG)BUFFLEN;
+			DWORD numOfBytes = 0;
+			OverlappedEx* overlappedex = new OverlappedEx();
+			overlappedex->type = EventType::SEND;
+
+			WSASend(session->socket, &wsaBuf, 1, OUT & numOfBytes, 0, reinterpret_cast<LPWSAOVERLAPPED>(&overlappedex->overlapped), nullptr);
+			int errorCode = ::WSAGetLastError();
+			if (errorCode != WSA_IO_PENDING)
+			{
+				if (errorCode != 0)
+					Disconnet(session);
+			}
+		}
+		else
+		{
+			this_thread::sleep_for(1ms);
+		}
+	}
+}
+
+Session* Listener::PopPacket()
+{
+	Session* session;
+	lock_guard<mutex> guard(_mutex);
+	if(_sessions.empty())
+	{
+		return nullptr;
+	}
+
+	session = _sessions.front();
+
+	_sessions.pop_front();
+	return session;
+
+
 }

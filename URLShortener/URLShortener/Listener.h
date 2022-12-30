@@ -32,20 +32,25 @@ public:
 	Listener();
 	~Listener();
 
-public:
+
 	bool Launch();
 	bool Accept();
 
+private:
 	void ProcessTask(HANDLE handle);
 	void ProcessRecv(Session* session);
 	void Disconnet(Session* session);
 
-
+	void SendPacket();
+	Session* PopPacket();
 private:
 	HANDLE _iocpHandle;
 	SOCKET _socket = INVALID_SOCKET;
 	SOCKADDR_IN listenerAddr;
+	deque<Session*> _sessions;
 
+	thread _sendThread;
 	vector<thread>	_threads;
 	mutex _mutex;
 };
+

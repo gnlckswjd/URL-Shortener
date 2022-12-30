@@ -5,8 +5,9 @@
 #include <iostream>
 using namespace std;
 
-#include <vector>;
-#include <thread>;
+#include <vector>
+#include <deque>
+#include <thread>
 #include <set>
 #include <mutex>
 
